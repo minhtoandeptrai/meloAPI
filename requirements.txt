@@ -1,5 +1,3 @@
 Flask
 mysql-connector-python
 azure-storage-blob
-azure
-mysql
