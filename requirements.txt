@@ -1,5 +1,4 @@
 Flask
 mysql-connector
 azure-storage-blob
-azure-storage-blob
 python-dotenv
