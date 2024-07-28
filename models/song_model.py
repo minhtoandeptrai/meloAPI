@@ -1,6 +1,5 @@
 from flask import json, make_response
 import mysql.connector
-
 class song_model:
     def __init__(self):
         try:
