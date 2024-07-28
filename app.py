@@ -1,5 +1,5 @@
 from flask import Flask
-from azure.storage import blob
+import controllers.song_controller
 app = Flask(__name__)
 
 @app.route('/')
