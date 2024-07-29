@@ -7,4 +7,5 @@ CORS(app)
 @app.route('/')
 def welcome():
     return 'MeloSpace API'
-# importcontrollers.song_controller
+
+import controllers.song_controller
