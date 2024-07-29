@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/b1e08f32-4300-4c4d-8bb2-b1d773f4fdc5/resourceGroups/mp3file/providers/Microsoft.Web/sites/melotestapi",
+    "appService.deploySubpath": "."
+}
