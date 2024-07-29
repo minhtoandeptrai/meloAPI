@@ -1,5 +1,4 @@
 Flask
-flask_cors
 mysql-connector
 azure-storage-blob
 python-dotenv
