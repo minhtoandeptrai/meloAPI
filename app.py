@@ -8,4 +8,8 @@ CORS(app)
 def welcome():
     return 'MeloSpace API'
 
-import controllers.song_controller
+import controllers.user_controller
+import controllers.record_controller
+import controllers.album_controller
+import controllers.playlist_controller
+import controllers.login_google_controller
