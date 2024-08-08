@@ -5,7 +5,7 @@ import mysql.connector
 class album_model:
     def __init__(self):
         try:
-            self.con = mysql.connector.connect(host = 'localhost', user = 'root', password='12345678', database='melospacedb')
+            self.con = mysql.connector.connect(host = 'localhost', user = 'root', password='123123', database='melospace')
             self.con.autocommit = True
             self.cur = self.con.cursor(dictionary=True)
             print('ok')

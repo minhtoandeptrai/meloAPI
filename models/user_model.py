@@ -6,22 +6,13 @@ import hashlib, time
 class user_model:
     def __init__(self):
         try:
-            self.con = mysql.connector.connect(host = "127.0.0.1", user = "root", password="12345678", database="melospacedb")
+            self.con = mysql.connector.connect(host = "127.0.0.1", user = "root", password="123123", database='melospace')
             self.con.autocommit = True
             self.cur = self.con.cursor(dictionary=True)
             print('connected')
         except:
             print('fault')
 
-    def get_user(self):
-        try:
-            self.cur.execute(f"select * from user")
-        except:
-            return make_response('fail', 401)
-        result = self.cur.fetchall()
-        if(len(result) > 0):
-            return make_response(json.dumps(result), 200)
-        else: return  make_response('No data found', 400)
 
     def get_user_by_google_id(self, id):
         try:
@@ -34,17 +25,28 @@ class user_model:
         else: return  False
 
     def get_user_by_id(self, id):
-        try:
-            self.cur.execute(f"select * from user where userID = '{id}'")
-        except:
-            return make_response('fail', 401)
+        print(id)
+        if(id):
+            try:
+                self.cur.execute(f"select * from user where userID = '{id}'")
+            except:
+                return make_response('fail', 401)
 
-        result = self.cur.fetchall()
-        if(len(result) > 0):
-            return make_response(json.dumps(result), 200)
-        else: return  make_response('No data found', 400)
-
+            result = self.cur.fetchall()
+            if(len(result) > 0):
+                return make_response(json.dumps(result), 200)
+            else: return  make_response('No data found', 400)
+        else:
+            try:
+                self.cur.execute(f"select * from user")
+            except:
+                return make_response('fail', 401)
+            result = self.cur.fetchall()
+            if(len(result) > 0):
+                return make_response(json.dumps(result), 200)
+            else: return  make_response('No data found', 400)
     def register(self, data):
+
         ## create guid
         current_time = str(time.time())
         name = data['username']
@@ -64,7 +66,7 @@ class user_model:
                     50,'{hass_password}','{data['fullname']}','{data['phonenumber']}','{guid}');""")
             return make_response('add susscess',200)
         except:
-            return make_response('fail')
+            return make_response('fail', 400)
         
 
     def register_with_google(self, data):
@@ -87,9 +89,10 @@ class user_model:
             return make_response('fail', 400)
 
     def login_user(self, data):
-        self.cur.execute(f"""select roleID, user.userID  from `user` inner join user_role on user.userID = user_role.userID
+        self.cur.execute(f"""select user.userID  from `user` 
                            where username = '{data['username']}' and hasspassword ='{data['password']}'""")
         result = self.cur.fetchall()
+        print(result)
         user_data = result[0]
         exp_epoch_time = datetime.now(tz=timezone.utc) + timedelta(days=2)
         _payload = {

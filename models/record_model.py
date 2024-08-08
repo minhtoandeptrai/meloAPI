@@ -5,7 +5,7 @@ import mysql.connector
 class record_model:
     def __init__(self):
         try:
-            self.con = mysql.connector.connect(host = 'localhost', user = 'root', password='12345678', database='melospacedb')
+            self.con = mysql.connector.connect(host = 'localhost', user = 'root', password='123123', database='melospace')
             self.con.autocommit = True
             self.cur = self.con.cursor(dictionary=True)
             print('ok')
@@ -44,6 +44,7 @@ class record_model:
         blob_client = blob_service_client.get_blob_client(container=env.BLOB.get('container_name'), blob= form['recordname'])
         blob_client.upload_blob(file.stream)
         url =  blob_client.url
+
         ## create guid 
         current_time = str(time.time())
         name = form['recordname']
@@ -53,12 +54,12 @@ class record_model:
 
         ## insert
         try:
-            self.cur.execute(f"""INSERT INTO `record`(`RecordName`,`RecordThumb`,`RecordURL`,`Duration`,`AuthID`,`Lyrics`,`View`,`AlbumID`,`LikeQuantity`,`ModeID`,`CateID`,`guid`) 
-                    VALUES('{form['recordname']}','{form['recordthumb']}','{url}',{form['duration']},{form['authid']},'{form['lyrics']}',0,
-                    {form['albumid']},0,{form['modeid']},{form['cateid']},'{guid}')""")
+            self.cur.execute(f"""INSERT INTO `record`(`RecordName`,`RecordURL`,`RecordThumb`,`AuthID`,
+                `ModeID`,`guid`,`deleted`,`CateID`,`AlbumID`) VALUES('{form['recordname']}','{url}','{form['thumb']}','{form['authid']}',
+                    {form['modeid']},'{guid}',0,'{form['cateid']}','{form['albumid']}');""")
             return make_response('add susscess', 200)
-        except:
-            return make_response('fail')
+        except mysql.connector.Error as err:
+            return make_response(err)
         
     def add_to_album(self, data ):
         try:

@@ -1,5 +1,6 @@
 Flask
-mysql-connector
+mysql-connector-python
 azure-storage-blob
 python-dotenv
-requests
+requestspy 
+jwt

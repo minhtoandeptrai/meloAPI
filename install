@@ -1,0 +1,4 @@
+-- for install
+py -m pip install -r .\requirements.txt
+-- for run
+py -m flask run --debug
