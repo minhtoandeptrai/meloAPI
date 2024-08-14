@@ -13,7 +13,6 @@ class user_model:
         except:
             print('fault')
 
-
     def get_user_by_google_id(self, id):
         try:
             self.cur.execute(f"select * from user where google_id = '{id}'")
@@ -87,23 +86,23 @@ class user_model:
             return make_response('add susscess',200)
         except:
             return make_response('fail', 400)
-
     def login_user(self, data):
-        self.cur.execute(f"""select user.userID  from `user` 
+        self.cur.execute(f"""select user.userID, guid, avatar, fullname  from `user` 
                            where username = '{data['username']}' and hasspassword ='{data['password']}'""")
         result = self.cur.fetchall()
-        print(result)
-        user_data = result[0]
-        exp_epoch_time = datetime.now(tz=timezone.utc) + timedelta(days=2)
-        _payload = {
-            'payload': user_data,
-            'exp': exp_epoch_time
-        }
-        jwt_token = jwt.encode(payload=_payload, key="abc", algorithm="HS256" )
-        return make_response({'token' : jwt_token}, 200)
+        if(len(result) > 0):
+            user_data = result[0]
+            exp_epoch_time = datetime.now(tz=timezone.utc) + timedelta(days=2)
+            _payload = {
+                'payload': user_data,
+                'exp': exp_epoch_time
+            }
+            jwt_token = jwt.encode(payload=_payload, key="abc", algorithm="HS256" )
+            return make_response({'token' : jwt_token}, 200)
+        else: return make_response('Invalid UserName or Password', 400)
     
     def login_user_google(self, id):
-        self.cur.execute(f"""select guid, fullname, google_id from `user` 
+        self.cur.execute(f"""select guid, fullname, avatar, google_id from `user` 
                            where google_id = '{id}' """)
         result = self.cur.fetchall()
         user_data = result[0]

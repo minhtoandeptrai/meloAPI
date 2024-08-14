@@ -15,3 +15,4 @@ import controllers.record_controller
 import controllers.album_controller
 import controllers.playlist_controller
 import controllers.login_google_controller
+import controllers.section_controller

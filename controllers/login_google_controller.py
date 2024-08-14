@@ -19,12 +19,12 @@ def login():
     user_info = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', headers=headers).json()
     ## check user if exist
     user = user_model()
-    if user.get_user_by_google_id(user_info['sub']) == True:
+    if  user.get_user_by_google_id(user_info['sub']) == True:
         jwt_token = user.login_user_google(user_info['sub'])
-        print(jwt_token)
-        return make_response(jsonify(access_token = jwt_token))
+        print('has')
+        return make_response(jsonify(access_token = jwt_token), 200)
     else: 
         user.register_with_google(user_info)
         jwt_token = user.login_user_google(user_info['sub'])
         print(jwt_token)
-        return make_response(jsonify(access_token = jwt_token))
+        return make_response(jsonify(access_token = jwt_token), 200)
