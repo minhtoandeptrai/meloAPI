@@ -12,60 +12,20 @@ class section_model:
         except:
             print('fault')
 
-    def get_DanhChoBan(self):
+    def get_all_section(self):
         try:
             self.cur.execute(f"""
-                        SELECT * 
-                            from section inner join sectionplaylist 
-                            on section.id = sectionplaylist.id_section
-                            inner join systemplaylist
-                            on sectionplaylist.id_playlist = systemplaylist.playlistid
-                            where section.id = 1""")
+                        SELECT * from section """)
         except:
             return 'Fail'
         result = self.cur.fetchall()
         if(len(result) > 0):
             return make_response(json.dumps(result), 200)
         else: return  make_response('No data found', 400)
-    def get_AlbumNoiBat(self):
+    def get_section_item(self, id):
         try:
             self.cur.execute(f"""
-                        SELECT * 
-                            from section inner join sectionplaylist 
-                            on section.id = sectionplaylist.id_section
-                            inner join systemplaylist
-                            on sectionplaylist.id_playlist = systemplaylist.playlistid
-                            where section.id = 2""")
-        except:
-            return 'Fail'
-        result = self.cur.fetchall()
-        if(len(result) > 0):
-            return make_response(json.dumps(result), 200)
-        else: return  make_response('No data found', 400)        
-    def get_NguoiDungNoiBat(self):
-        try:
-            self.cur.execute(f"""
-                        SELECT * 
-                            from section inner join sectionplaylist 
-                            on section.id = sectionplaylist.id_section
-                            inner join systemplaylist
-                            on sectionplaylist.id_playlist = systemplaylist.playlistid
-                            where section.id = 3""")
-        except:
-            return 'Fail'
-        result = self.cur.fetchall()
-        if(len(result) > 0):
-            return make_response(json.dumps(result), 200)
-        else: return  make_response('No data found', 400)
-    def get_DanhSanhPhatNoiBat(self):
-        try:
-            self.cur.execute(f"""
-                        SELECT * 
-                            from section inner join sectionplaylist 
-                            on section.id = sectionplaylist.id_section
-                            inner join systemplaylist
-                            on sectionplaylist.id_playlist = systemplaylist.playlistid
-                            where section.id = 3""")
+                        SELECT * from sectionitem where sectionid = {id} """)
         except:
             return 'Fail'
         result = self.cur.fetchall()
