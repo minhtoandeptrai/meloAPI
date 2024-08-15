@@ -2,6 +2,7 @@ from flask import json, make_response
 from azure.storage.blob import BlobServiceClient
 import env, hashlib, time
 import mysql.connector
+from mysql.connector import errorcode
 class record_model:
     def __init__(self):
         try:
@@ -11,7 +12,7 @@ class record_model:
             print('ok')
         except:
             print('fault')
-    def get_record(self, id, cate, album):
+    def get_record(self, user, id, cate, album):
         conditions = []
         if id:
             conditions.append(f"guid = '{id}'")
@@ -19,14 +20,15 @@ class record_model:
             conditions.append(f"cateID =  {cate} ")
         if album:
             conditions.append(f"albumID = '{album}'")
-
+        if user:
+            conditions.append(f"authID = '{user}'")
         where_clause = ' and '.join(conditions)
     
         if not where_clause:
             where_clause = '1=1'
         
         try:
-            self.cur.execute(f"select * from record where {where_clause} ")
+            self.cur.execute(f"select * from record where {where_clause} and deleted = 0")
         except:
             return make_response('fail')
         result = self.cur.fetchall()
@@ -70,3 +72,13 @@ class record_model:
             return make_response('update sussess', 200)
         except:
             return make_response('Cannot update', 400)
+        
+    def hide_record(self, data):
+        try:
+            self.cur.execute(f"""
+                UPDATE record 
+                set deleted = 1
+                where guid = '{data['id']}'; """)
+            return make_response('sussess', 200)
+        except mysql.connector.Error as err:
+            return make_response('{err}', 400)

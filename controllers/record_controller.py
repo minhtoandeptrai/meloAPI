@@ -11,10 +11,11 @@ auth = auth_model()
 # get record
 @app.route("/record")
 def get_record():
+    _user = request.args.get("user")
     _id = request.args.get("id")
     _cate= request.args.get("cate")
     _album = request.args.get("album")
-    return record.get_record(id=_id, cate=_cate, album=_album)
+    return record.get_record(user= _user,id=_id, cate=_cate, album=_album)
 
 # post record
 @app.route("/record/add", methods=['post'])
@@ -24,3 +25,7 @@ def add_record():
 @app.route("/record/addtoalbum", methods = ['patch'])
 def add_to_album():
     return record.add_to_album(request.form)
+
+@app.route("/record/hide", methods = ['patch'])
+def hide_records():
+    return record.hide_record(request.form)
