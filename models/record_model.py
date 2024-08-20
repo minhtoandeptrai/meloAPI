@@ -38,14 +38,20 @@ class record_model:
 
     def add_new_record(self, data):
         form = data.form
-        file = data.files.get('file')
-
-        ##take record file and upload to blob
-
+        file = data.files.get('record')
+        image = data.files.get('image')
+        ##take record file and upload to blob 
         blob_service_client = BlobServiceClient.from_connection_string(env.BLOB.get('connection_string'))
         blob_client = blob_service_client.get_blob_client(container=env.BLOB.get('container_name'), blob= form['recordname'])
         blob_client.upload_blob(file.stream)
-        url =  blob_client.url
+        record_url =  blob_client.url
+
+        ##upload img
+        name = form['recordname'] + 'img'
+        blob_service_client = BlobServiceClient.from_connection_string(env.BLOB.get('connection_string'))
+        blob_client = blob_service_client.get_blob_client(container=env.BLOB.get('container_name'), blob = name)
+        blob_client.upload_blob(image.stream)
+        img_url =  blob_client.url
 
         ## create guid 
         current_time = str(time.time())
@@ -57,7 +63,7 @@ class record_model:
         ## insert
         try:
             self.cur.execute(f"""INSERT INTO `record`(`RecordName`,`RecordURL`,`RecordThumb`,`AuthID`,
-                `ModeID`,`guid`,`deleted`,`CateID`,`AlbumID`) VALUES('{form['recordname']}','{url}','{form['thumb']}','{form['authid']}',
+                `ModeID`,`guid`,`deleted`,`CateID`,`AlbumID`) VALUES('{form['recordname']}','{record_url}','{img_url}','{form['authid']}',
                     {form['modeid']},'{guid}',0,'{form['cateid']}','{form['albumid']}');""")
             return make_response('add susscess', 200)
         except mysql.connector.Error as err:

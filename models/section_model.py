@@ -24,33 +24,14 @@ class section_model:
         else: return  make_response('No data found', 400)
     def get_section_item(self, id):
         result = []
-        if id == '1':
-            try:
-                self.cur.execute(f"""
-                    SELECT * FROM melospace.sectionitem
-                    inner join user 
-                    on sectionitem.userid = user.guid; """)
-            except:
-                return 'Fail'
-            result = self.cur.fetchall()
-        elif id == '2':
-            try:
-                self.cur.execute(f"""
-                    SELECT * FROM melospace.sectionitem
-                        inner join album 
-                        on sectionitem.albumid = album.guid; """)
-            except:
-                return 'Fail'
-            result = self.cur.fetchall()
-        elif id == '3':
-            try:
-                self.cur.execute(f"""
-                    SELECT * FROM melospace.sectionitem
-                    inner join systemplaylist 
-                    on sectionitem.playlistid = systemplaylist.guid; """)
-            except:
-                return 'Fail'
-            result = self.cur.fetchall()
+        try:
+            self.cur.execute(f"""
+                SELECT * FROM melospace.sectionitem
+                where sectionid = {id} """)
+        except:
+            return 'Fail'
+        result = self.cur.fetchall()
+       
         if(len(result) > 0):
             return make_response(json.dumps(result), 200)
         else: return  make_response('No data found', 400)

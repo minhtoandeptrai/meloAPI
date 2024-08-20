@@ -10,7 +10,8 @@ album = album_model()
 @app.route('/album')
 def get_album():
     id = request.args.get('userid')
-    return album.get_album(id)
+    albumId = request.args.get('albumid')
+    return album.get_album(id=id, alID=albumId)
 
 @app.route('/album', methods=['post'])
 def create_album():

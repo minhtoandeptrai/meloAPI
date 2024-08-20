@@ -34,3 +34,13 @@ class playlist_model():
         if(len(result) > 0):
             return make_response(json.dumps(result), 200)
         else: return  make_response('No data found', 400)
+
+    def get_systemPlaylist(self, id):
+        try:
+            self.cur.execute(f""" select * from systemplaylist where guid = '{id}' """)
+        except:
+            return make_response("fail")
+        result = self.cur.fetchall()
+        if(len(result) > 0):
+            return make_response(json.dumps(result), 200)
+        else: return  make_response('No data found', 400)

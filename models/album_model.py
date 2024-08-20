@@ -12,15 +12,25 @@ class album_model:
         except:
             print('fault')
 
-    def get_album(self, id):
-        try:
-            self.cur.execute(f"""select * from album where userid = '{id}'""")
-        except:
-            return make_response("fail", 400)
-        result = self.cur.fetchall()
-        if(len(result) > 0):
-            return make_response(json.dumps(result), 200)
-        else: return  make_response('No data found', 400)
+    def get_album(self, id, alID):
+        if id:
+            try:
+                self.cur.execute(f"""select * from album where userid = '{id}'""")
+            except:
+                return make_response("fail", 400)
+            result = self.cur.fetchall()
+            if(len(result) > 0):
+                return make_response(json.dumps(result), 200)
+            else: return  make_response('No data found', 400)
+        elif alID:
+            try:
+                self.cur.execute(f"""select * from album where guid = '{alID}'""")
+            except:
+                return make_response("fail", 400)
+            result = self.cur.fetchall()
+            if(len(result) > 0):
+                return make_response(json.dumps(result), 200)
+            else: return  make_response('No data found', 400)
         
     def create_album(self, data):
         name = data['albumname']
