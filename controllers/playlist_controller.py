@@ -10,9 +10,9 @@ def get_playlist():
     id = request.args.get('userid')
     return playlist.get_playlist(id=id)
 
-@app.route('/playlist', methods=['post'])
+@app.route('/playlist/add', methods=['post'])
 def create_playlist():
-    return playlist.create_playlist(request.form)
+    return playlist.create_playlist(request)
 
 @app.route('/systemPl')
 def get_systemPlaylist():

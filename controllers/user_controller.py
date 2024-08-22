@@ -10,7 +10,6 @@ auth = auth_model()
 @app.route('/user')
 def get_user_by_id():
     id = request.args.get('id')
-    print(id)
     return user.get_user_by_id(id)
 
 @app.route('/user/login',  methods=['post'])

@@ -1,5 +1,7 @@
 from flask import json, make_response
 import env, hashlib, time
+from azure.storage.blob import BlobServiceClient
+
 import mysql.connector
 
 class playlist_model():
@@ -12,18 +14,31 @@ class playlist_model():
         except:
             print('fault')
     
-    def create_playlist(self, data):
-        name = data['playlistname']
-        print(name)
+    def create_playlist(self, f):
+        data = f.form
+        name = data['name']
+        description = data['description']
+        userid = data['userid']
+        image = f.files.get('thumb')
+
         hash_guid_object = hashlib.sha256(name.encode())
         guid = hash_guid_object.hexdigest()
+        img_url = ''
+        ##
+        ##take record file and upload to blob 
+        if image:
+            i_name = data['description'] + 'img'
+            blob_service_client = BlobServiceClient.from_connection_string(env.BLOB.get('connection_string'))
+            blob_client = blob_service_client.get_blob_client(container=env.BLOB.get('container_name'), blob = i_name)
+            blob_client.upload_blob(image.stream)
+            img_url = blob_client.url
         try:
             self.cur.execute(f"""
-                INSERT INTO `userplaylist`(`guid`,`playlistname`,`userid`) VALUES('{guid}','{name}',
-               '{data['userid']}') """)
+                INSERT INTO `userplaylist`(`guid`,`playlistname`,`userid`, `description`, `thumb`) VALUES('{guid}','{name}', 
+              '{userid}', '{description}', '{img_url}') """)
             return make_response('add success', 200)
-        except:
-            return make_response("fail")
+        except :
+            return make_response('fail', 400)
     
     def get_playlist(self, id):
         try:

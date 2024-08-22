@@ -57,13 +57,16 @@ class user_model:
 
         hash_pass_object = hashlib.sha256(data['password'].encode())
         hass_password = hash_pass_object.hexdigest()
+
+        print(hass_password)
         ##insert
         try:
             self.cur.execute(f"""
                     INSERT INTO `user`(`UserName`,`Avatar`,`Email`,`Score`,`HassPassWord`,`FullName`,`PhoneNumber`,`guid`) 
-                    VALUES('{data['username']}','{data['avatar']}','{data['email']}',
+                    VALUES('{data['username']}','https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-19.jpg','{data['email']}',
                     50,'{hass_password}','{data['fullname']}','{data['phonenumber']}','{guid}');""")
             return make_response('add susscess',200)
+        
         except:
             return make_response('fail', 400)
         

@@ -13,9 +13,9 @@ def get_album():
     albumId = request.args.get('albumid')
     return album.get_album(id=id, alID=albumId)
 
-@app.route('/album', methods=['post'])
+@app.route('/album/add', methods=['post'])
 def create_album():
-    return album.create_album(request.form)
+    return album.create_album(request)
 
 @app.route('/album/update', methods=['patch'])
 def update_album():

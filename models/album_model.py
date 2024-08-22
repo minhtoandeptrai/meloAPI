@@ -32,14 +32,25 @@ class album_model:
                 return make_response(json.dumps(result), 200)
             else: return  make_response('No data found', 400)
         
-    def create_album(self, data):
+    def create_album(self, f):
+        data = f.form
         name = data['albumname']
+        image = f.files.get('thumb')
+
         hash_guid_object = hashlib.sha256(name.encode())
         guid = hash_guid_object.hexdigest()
+
+        img_url = ''
+        if image:
+            i_name = data['description'] + 'img'
+            blob_service_client = BlobServiceClient.from_connection_string(env.BLOB.get('connection_string'))
+            blob_client = blob_service_client.get_blob_client(container=env.BLOB.get('container_name'), blob = i_name)
+            blob_client.upload_blob(image.stream)
+            img_url = blob_client.url
         try:
             self.cur.execute(f"""
-                INSERT INTO `album`(`guid`,`albumname`,`albumthumb`,`userid`) VALUES('{guid}','{name}',
-                '{data['albumthumb']}','{data['userid']}') """)
+                INSERT INTO `album`(`guid`,`albumname`,`albumthumb`,`userid`, `description`) VALUES('{guid}','{name}',
+                '{img_url}','{data['userid']}', '{data['description']}') """)
             return make_response('add success', 200)
         except:
             return make_response("fail")
