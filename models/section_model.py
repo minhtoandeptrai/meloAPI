@@ -1,20 +1,24 @@
 from flask import json, make_response, jsonify
 from azure.storage.blob import BlobServiceClient
-import env, hashlib, time
-import mysql.connector
 import app
 class section_model:
     def get_all_section(self):
+        conn = app.get_db_connection()
+        if conn is None:
+            return make_response(jsonify({"error": "Unable to connect to database"}), 500)
         try:
-            self.cur.execute(f"""
+            cur = conn.cursor(dictionary=True)
+            cur.execute(f"""
                 SELECT * from section """)
-            result = self.cur.fetchall()
+            result = cur.fetchall()
             if(len(result) > 0):
                 return make_response(json.dumps(result), 200)
             else: return  make_response('No data found', 200)
         except:
             return make_response('fail', 400)
-        
+        finally:
+            cur.close()
+            conn.close()
     def get_section_item(self, id):
         conn = app.get_db_connection()
         if conn is None:
