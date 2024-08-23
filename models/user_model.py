@@ -1,9 +1,12 @@
-from flask import json, make_response
+import base64
+from flask import json, jsonify, make_response
 import mysql.connector
 from datetime import datetime, timedelta, timezone
 import jwt
 import hashlib, time
 import app
+from datetime import datetime
+from dateutil import parser
 class user_model:
 
     def get_user_by_google_id(self, id):
@@ -66,7 +69,6 @@ class user_model:
         hash_pass_object = hashlib.sha256(data['password'].encode())
         hass_password = hash_pass_object.hexdigest()
 
-        print(hass_password)
         ##insert
         try:
             conn = app.get_db_connection()
@@ -112,29 +114,46 @@ class user_model:
         finally:
             cur.close()
             conn.close()
+    
     def login_user(self, data):
-        try:
-            conn = app.get_db_connection()
-            cur = conn.cursor(dictionary=True)
-            cur.execute(f"""select user.userID, guid, avatar, fullname  from `user` 
-                            where username = '{data['username']}' and hasspassword ='{data['password']}'""")
-            result = cur.fetchall()
-            if(len(result) > 0):
-                user_data = result[0]
-                exp_epoch_time = datetime.now(tz=timezone.utc) + timedelta(days=2)
-                _payload = {
-                    'payload': user_data,
-                    'exp': exp_epoch_time
-                }
-                jwt_token = jwt.encode(payload=_payload, key="abc", algorithm="HS256" )
-                return make_response({'token' : jwt_token}, 200)
-            else: return make_response('Invalid UserName or Password', 400)
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return make_response('fail', 400)
-        finally:
-            cur.close()
-            conn.close()
+        enData = data['password']
+        decrypted_data= app.decrypt_data(enData)
+
+        password, timestamp = decrypted_data.split('|')
+        time_to_compare = parser.isoparse(timestamp)
+        time_to_compare = time_to_compare.replace(tzinfo=None)  
+        current_time = datetime.utcnow()
+        time_diff = current_time-time_to_compare
+
+        secs = time_diff.total_seconds() 
+
+        hash_pass_object = hashlib.sha256(password.encode())
+        hass_password = hash_pass_object.hexdigest()
+
+        print(password)
+        if(secs < 5):
+            try:
+                conn = app.get_db_connection()
+                cur = conn.cursor(dictionary=True)
+                cur.execute(f"""select user.userID, guid, avatar, fullname  from `user` 
+                                where username = '{data['username']}' and hasspassword ='{hass_password}'""")
+                result = cur.fetchall()
+                if(len(result) > 0):
+                    user_data = result[0]
+                    exp_epoch_time = datetime.now(tz=timezone.utc) + timedelta(days=2)
+                    _payload = {
+                        'payload': user_data,
+                        'exp': exp_epoch_time
+                    }
+                    jwt_token = jwt.encode(payload=_payload, key="abc", algorithm="HS256" )
+                    return make_response({'token' : jwt_token}, 200)
+                else: return make_response('Invalid UserName or Password', 400)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return make_response('fail', 400)
+            finally:
+                cur.close()
+                conn.close()
     
     def login_user_google(self, id):
         try: 

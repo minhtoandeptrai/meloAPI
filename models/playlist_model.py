@@ -37,7 +37,6 @@ class playlist_model():
                 print(f"An error occurred: {e}")
                 return make_response('fail', 400)
         finally:
-            cur.close()
             conn.close()
 
     def get_playlist(self, id):

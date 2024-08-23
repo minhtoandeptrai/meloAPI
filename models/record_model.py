@@ -41,9 +41,11 @@ class record_model:
         form = data.form
         file = data.files.get('record')
         image = data.files.get('image')
-        ##take record file and upload to blob 
+       
+        #take record file and upload to blob 
+        record_name = form['recordname'] + 'sound'
         blob_service_client = BlobServiceClient.from_connection_string(env.BLOB.get('connection_string'))
-        blob_client = blob_service_client.get_blob_client(container=env.BLOB.get('container_name'), blob= form['recordname'])
+        blob_client = blob_service_client.get_blob_client(container=env.BLOB.get('container_name'), blob = record_name)
         blob_client.upload_blob(file.stream)
         record_url =  blob_client.url
 
@@ -66,15 +68,15 @@ class record_model:
             conn = app.get_db_connection()
             cur = conn.cursor(dictionary=True)
             cur.execute(f"""INSERT INTO `record`(`RecordName`,`RecordURL`,`RecordThumb`,`AuthID`,
-                `ModeID`,`guid`,`deleted`,`CateID`,`AlbumID`) VALUES('{form['recordname']}','{record_url}','{img_url}','{form['authid']}',
-                    {form['modeid']},'{guid}',0,'{form['cateid']}','{form['albumid']}');""")
+                `ModeID`,`guid`,`deleted`) VALUES('{form['recordname']}','{record_url}','{img_url}','{form['authid']}',
+                    '{form['modeid']}','{guid}',0);""")
+            conn.commit()
             return make_response('add susscess', 200)
         except Exception as e:
                 print(f"An error occurred: {e}")
                 return make_response('fail', 400)
         finally:
-            cur.close()
-            conn.close()
+            conn.close()    
         
     def add_to_album(self, data ):
         try:
@@ -84,6 +86,7 @@ class record_model:
                 UPDATE record
                 SET albumid = '{data['albumid']}'
                 WHERE guid = '{data['recordid']}'; """)
+            conn.commit()
             return make_response('update sussess', 200)
         except Exception as e:
                 print(f"An error occurred: {e}")
