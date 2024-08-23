@@ -1,37 +1,38 @@
-from flask import json, make_response
+from flask import json, make_response, jsonify
 from azure.storage.blob import BlobServiceClient
 import env, hashlib, time
 import mysql.connector
+import app
 class album_model:
-    def __init__(self):
-        try:
-            self.con = mysql.connector.connect(host = 'localhost', user = 'root', password='123123', database='melospace')
-            self.con.autocommit = True
-            self.cur = self.con.cursor(dictionary=True)
-            print('ok')
-        except:
-            print('fault')
-
     def get_album(self, id, alID):
+        conn = app.get_db_connection()
+        if conn is None:
+            return make_response(jsonify({"error": "Unable to connect to database"}), 500)
         if id:
             try:
-                self.cur.execute(f"""select * from album where userid = '{id}'""")
+                cur = conn.cursor(dictionary=True)
+                cur.execute(f"""select * from album where userid = '{id}'""")
             except:
                 return make_response("fail", 400)
-            result = self.cur.fetchall()
+            result =  cur.fetchall()
             if(len(result) > 0):
                 return make_response(json.dumps(result), 200)
             else: return  make_response('No data found', 400)
         elif alID:
             try:
-                self.cur.execute(f"""select * from album where guid = '{alID}'""")
-            except:
-                return make_response("fail", 400)
-            result = self.cur.fetchall()
-            if(len(result) > 0):
-                return make_response(json.dumps(result), 200)
-            else: return  make_response('No data found', 400)
-        
+                cur = conn.cursor(dictionary=True)
+                cur.execute(f"""select * from album where guid = '{alID}'""")
+                result = cur.fetchall()
+                if(len(result) > 0):
+                    return make_response(json.dumps(result), 200)
+                else: return  make_response('No data found', 400)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return make_response('fail', 400)
+            finally:
+                cur.close()
+                conn.close()
+            
     def create_album(self, f):
         data = f.form
         name = data['albumname']
@@ -48,12 +49,20 @@ class album_model:
             blob_client.upload_blob(image.stream)
             img_url = blob_client.url
         try:
-            self.cur.execute(f"""
+            conn = app.get_db_connection()
+            cur = conn.cursor(dictionary=True)
+            cur.execute(f"""
                 INSERT INTO `album`(`guid`,`albumname`,`albumthumb`,`userid`, `description`) VALUES('{guid}','{name}',
                 '{img_url}','{data['userid']}', '{data['description']}') """)
+            conn.commit()
+            
             return make_response('add success', 200)
-        except:
-            return make_response("fail")
+        except Exception as e:
+                print(f"An error occurred: {e}")
+                return make_response('fail', 400)
+        finally:
+            cur.close()
+            conn.close()
     
     def update_album(self,data):
         id = data['albumid']

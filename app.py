@@ -10,7 +10,6 @@ dbconfig = {
     "host": "localhost",
     "database": "melospace"
 }
-
 app = Flask(__name__)
 CORS(app)
 
@@ -25,12 +24,12 @@ def get_db_connection():
 
 @app.route('/')
 def welcome():
-   
+
     return 'MeloSpace API'
 
-# import controllers.user_controller
-# import controllers.record_controller
-# import controllers.album_controller
-# import controllers.playlist_controller
-# import controllers.login_google_controller
+import controllers.user_controller
+import controllers.record_controller
+import controllers.album_controller
+import controllers.playlist_controller
+import controllers.login_google_controller
 import controllers.section_controller

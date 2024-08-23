@@ -3,15 +3,8 @@ from azure.storage.blob import BlobServiceClient
 import env, hashlib, time
 import mysql.connector
 from mysql.connector import errorcode
+import app
 class record_model:
-    def __init__(self):
-        try:
-            self.con = mysql.connector.connect(host = 'localhost', user = 'root', password='123123', database='melospace')
-            self.con.autocommit = True
-            self.cur = self.con.cursor(dictionary=True)
-            print('ok')
-        except:
-            print('fault')
     def get_record(self, user, id, cate, album):
         conditions = []
         if id:
@@ -28,14 +21,22 @@ class record_model:
             where_clause = '1=1'
         
         try:
-            self.cur.execute(f"select * from record where {where_clause} and deleted = 0")
-        except:
-            return make_response('fail')
-        result = self.cur.fetchall()
-        if(len(result) > 0):
-            return make_response(json.dumps(result), 200)
-        else: return  make_response('No data found', 400)
+            conn = app.get_db_connection()
+            cur = conn.cursor(dictionary=True)
+            cur.execute(f"select * from record where {where_clause} and deleted = 0")
+            result = cur.fetchall()
+            if(len(result) > 0):
+                return make_response(json.dumps(result), 200)
+            else: return  make_response('No data found', 400)
 
+        except Exception as e:
+                print(f"An error occurred: {e}")
+                return make_response('fail', 400)
+        finally:
+            cur.close()
+            conn.close()
+        
+        
     def add_new_record(self, data):
         form = data.form
         file = data.files.get('record')
@@ -62,29 +63,47 @@ class record_model:
 
         ## insert
         try:
-            self.cur.execute(f"""INSERT INTO `record`(`RecordName`,`RecordURL`,`RecordThumb`,`AuthID`,
+            conn = app.get_db_connection()
+            cur = conn.cursor(dictionary=True)
+            cur.execute(f"""INSERT INTO `record`(`RecordName`,`RecordURL`,`RecordThumb`,`AuthID`,
                 `ModeID`,`guid`,`deleted`,`CateID`,`AlbumID`) VALUES('{form['recordname']}','{record_url}','{img_url}','{form['authid']}',
                     {form['modeid']},'{guid}',0,'{form['cateid']}','{form['albumid']}');""")
             return make_response('add susscess', 200)
-        except mysql.connector.Error as err:
-            return make_response(err)
+        except Exception as e:
+                print(f"An error occurred: {e}")
+                return make_response('fail', 400)
+        finally:
+            cur.close()
+            conn.close()
         
     def add_to_album(self, data ):
         try:
-            self.cur.execute(f"""
+            conn = app.get_db_connection()
+            cur = conn.cursor(dictionary=True)
+            cur.execute(f"""
                 UPDATE record
                 SET albumid = '{data['albumid']}'
                 WHERE guid = '{data['recordid']}'; """)
             return make_response('update sussess', 200)
-        except:
-            return make_response('Cannot update', 400)
+        except Exception as e:
+                print(f"An error occurred: {e}")
+                return make_response('fail', 400)
+        finally:
+            cur.close()
+            conn.close()
         
     def hide_record(self, data):
         try:
-            self.cur.execute(f"""
+            conn = app.get_db_connection()
+            cur = conn.cursor(dictionary=True)
+            cur.execute(f"""
                 UPDATE record 
                 set deleted = 1
                 where guid = '{data['id']}'; """)
             return make_response('sussess', 200)
-        except mysql.connector.Error as err:
-            return make_response('{err}', 400)
+        except Exception as e:
+                print(f"An error occurred: {e}")
+                return make_response('fail', 400)
+        finally:
+            cur.close()
+            conn.close()
